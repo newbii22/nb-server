@@ -1,6 +1,7 @@
 package com.software.newbii.domain.member;
 
 import com.software.newbii.domain.location.Location;
+import com.software.newbii.domain.member.dto.MemberDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,11 +25,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLRestriction("is_deleted is FALSE")
-@Table(name = "member")
 public class Member {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable= false, unique = true)
@@ -53,13 +52,6 @@ public class Member {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "guardian_id")
     private Member guardian;
-
-    /**
-     * 안전 영역: MySQL geometry(MultiPolygon)
-     */
-    @JdbcTypeCode(org.hibernate.type.SqlTypes.GEOMETRY)
-    @Column(columnDefinition = "geometry(MULTIPOLYGON,4326)")
-    private MultiPolygon safeZone;
 
 
     @OneToOne(mappedBy = "guardian", fetch = FetchType.LAZY)
@@ -89,5 +81,15 @@ public class Member {
         this.oauthId = oauthId;
     }
 
-
+    public static Member fromDto(MemberDto dto) {
+        return Member.builder()
+                .email(dto.getEmail())
+                .password("1234")
+                .role(dto.getRole())
+                .name(dto.getName())
+                .birth(dto.getBirth())
+                .phone(dto.getPhone())
+                .oauthId("dto.getOauthId()")
+                .build();
+    }
 }

@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -47,6 +49,32 @@ public class MemberService {
         .build();
   }
 
+
+    @Transactional
+    public MemberDto saveMember(Long memberId) {
+
+        Member member = Member.builder()
+                .id(memberId)
+                .email("nb@gmail.com")
+                .password("1234") // TODO: 비밀번호 암호화 필요
+                .name("NB")
+                .phone("010-1111-2222")
+                .birth(LocalDate.parse("03-05-30"))
+                .role(MemberRole.USER)
+                .build();
+
+        Member saved = memberRepository.save(member);
+        log.info("회원 생성 성공: {}", saved.getId());
+
+        return MemberDto.builder()
+                .id(saved.getId())
+                .email(saved.getEmail())
+                .name(saved.getName())
+                .phone(saved.getPhone())
+                .birth(saved.getBirth())
+                .role(saved.getRole())
+                .build();
+    }
 
   // read
   @Transactional(readOnly = true)
@@ -107,7 +135,6 @@ public class MemberService {
     log.info("회원 수정 성공: memberId: {}", member.getId());
   }
 
-
   // delete (하드 삭제)
   @Transactional
   public void deleteMember(Long memberId) {
@@ -120,10 +147,6 @@ public class MemberService {
     memberRepository.delete(member);
     log.info("회원 삭제 성공 (하드 삭제): memberId: {}", memberId);
   }
-
-
-
-
 
   private void validateEmailNotExists(String email) {
     if (memberRepository.existsByEmail(email)) {

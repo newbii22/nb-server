@@ -15,18 +15,10 @@ public class SafeZoneService {
     private final MemberRepository memberRepo;
     private final GeometryFactory gf;
 
-    /**
-     * 클라이언트로부터 받은 위/경도가
-     * member.safeZone 내부인지 검사.
-     */
     @Transactional(readOnly = true)
     public boolean isInsideSafeZone(Long memberId, BigDecimal lat, BigDecimal lon) {
         Member m = memberRepo.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원없음"));
-        MultiPolygon zone = m.getSafeZone();
-        if (zone == null) return false;
-        //Point p = gf.createPoint(new Coordinate(lon, lat));
-        //return zone.contains(p);
-        else return true;
+        return false;
     }
 }

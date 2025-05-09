@@ -1,11 +1,14 @@
 package com.software.newbii.domain.location.service;
 
 import com.software.newbii.domain.location.Location;
+import com.software.newbii.domain.location.dto.LocationDto;
 import com.software.newbii.domain.location.dto.LocationRequest;
 import com.software.newbii.domain.location.dto.LocationResponse;
 import com.software.newbii.domain.location.repository.LocationRepository;
 import com.software.newbii.domain.member.Member;
+import com.software.newbii.domain.member.dto.MemberDto;
 import com.software.newbii.domain.member.repository.MemberRepository;
+import com.software.newbii.domain.member.service.MemberService;
 import com.software.newbii.global.exception.BaseException;
 import com.software.newbii.global.exception.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ public class LocationService {
 
     private final LocationRepository locationRepository;
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     // top 2 frequent
     @Transactional(readOnly = true)
@@ -66,9 +70,11 @@ public class LocationService {
 
     // 집 주소 변경
     @Transactional
-    public void setHome(Long memberId, LocationRequest request) {
-        Member member = loadMember(memberId);
-        Location location = saveNewLocation(request, member);
+    public void setHome(Long memberId, BigDecimal latitude, BigDecimal longitude) {
+        MemberDto memberDto = memberService.saveMember(memberId);
+        Member member = Member.fromDto(memberDto);
+        LocationDto locationDto = LocationDto.of(latitude, longitude);
+        Location location = saveNewLocation(locationDto, member);
         location.setLocationType(HOME);
         locationRepository.save(location);
     }
@@ -99,8 +105,9 @@ public class LocationService {
             return "방문 정보가 업데이트되었습니다.";
         }
 
+        LocationDto dto = LocationDto.of(request.getLatitude(), request.getLongitude());
         // 신규 위치면 등록
-        saveNewLocation(request, member);
+        saveNewLocation(dto, member);
 
         return "등록 되었습니다";
     }
@@ -112,20 +119,20 @@ public class LocationService {
         return locationRepository.findByLatitudeAndLongitude(lat, lon);
     }
 
-    private Location saveNewLocation(LocationRequest request, Member member) {
+    private Location saveNewLocation(LocationDto dto, Member member) {
         // 신규 위치면 새로 저장
-        Location location = registerLocation(request, member.getId());
+        Location location = registerLocation(dto, member.getId());
         location.post(member);
         locationRepository.save(location);
         return location;
     }
 
-    private static Location registerLocation(LocationRequest request, Long memberId) {
+    private static Location registerLocation(LocationDto locationDto, Long memberId) {
         return Location.builder()
-                .latitude(request.getLatitude())
-                .longitude(request.getLongitude())
-                .locationType(request.getLocationType())
-                .locationName(request.getLocationName())
+                .latitude(locationDto.getLatitude())
+                .longitude(locationDto.getLongitude())
+                .locationType(HOME)
+                .locationName(HOME.name())
                 .visitCount(1)
                 .lastVisitedAt(LocalDateTime.now())
                 .build();

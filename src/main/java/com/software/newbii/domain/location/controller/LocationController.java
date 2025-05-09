@@ -72,10 +72,12 @@ public class LocationController {
 //    }
 
     @PostMapping("/v3/location/home")
-    public void setHome(
+    public String setHome(
             @RequestParam Long memberId,
-            @RequestBody LocationRequest req) {
-        locationService.setHome(memberId, req);
+            @RequestParam BigDecimal latitude,
+            @RequestParam BigDecimal longitude) {
+        locationService.setHome(memberId, latitude, longitude);
+        return "등록되었습니다.";
     }
 
     @PostNewLocation
