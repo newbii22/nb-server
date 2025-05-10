@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "location")
 public class Location {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,7 +58,7 @@ public class Location {
 
   public void post(Member member){
     this.member = member;
-    member.getLocations().add(this);
+    //member.getLocations().add(this);
   }
 
   public static Location from(LocationRequest request){
